@@ -1,64 +1,72 @@
-name: Build and Deploy to AWS EB
+name: "Terraform"
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "master" branch
   push:
-    branches: [ "main" ]
-  #pull_request:
-  #  branches: [ "master" ]
+    branches:
+      - main
+  
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  terraform:
+    name: "Terraform"
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
-      id-token: write
-      contents: read
-      
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-       
-  
-      # GH Actions OpenIDConnect
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
         with:
-          role-to-assume: arn:aws:iam::058253789961:role/github-actions-hoopla
-          aws-region: us-east-1
-     
-      # Runs a single command using the runners shell
-      - name: Set up JDK 11
-        uses: actions/setup-java@v4
+           terraform_version: 0.13.0:
+         
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+      
+
+      - name: Terraform Plan
+        id: plan
+        if: github.event_name == 'pull_request'
+        run: terraform plan -no-color -input=false
+        continue-on-error: true
+
+      - name: Update Pull Request
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: ${{ steps.plan.outputs.stdout }}
         with:
-          java-version: '11'
-          distribution: 'temurin' 
-          
-      - name: Build with Maven
-        run: |
-          VERSION=`grep -m1 version package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g'`
-          TIMESTAMP=`date +"%Y-%m-%d-%H.%M.%S"`
-          APPLICATION_NAME="media-ws"
-          VERSION_LABEL="${VERSION}-${TIMESTAMP}"
-          echo "VERSION_LABEL=${VERSION_LABEL}" >> "$GITHUB_ENV"
-          
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
 
+            <details><summary>Show Plan</summary>
 
-      - name: Deploy to Elastic Beastalk
-        run: |
-          aws s3 cp target/$ARTIFACT s3://elasticbeanstalk-us-east-1-05825389961/$APPLICATION_NAME
-        
-      - name: Create Beanstalk App Versions 
-        run: aws elasticbeanstalk create-application-verion --application-name $APPLICATION_NAME --version-label $VERSION_LABEL --source-bundle S3Bucket=elasticbeanstalk-us-east-1-05825389961,S3Key=$APPLICATION_NAME/$ARTIFACT
+            \`\`\`terraform\n
+            ${process.env.PLAN}
+            \`\`\`
 
-      - name: Update and deploy to EB 
-        run: aws elasticbeanstalk update environment --application-name $APPLICATION_NAME-media-dev --environment-name $APPLICATION_NAME --version-label $VERSION_LABEL 
+            </details>
+
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false
