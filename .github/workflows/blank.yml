@@ -20,6 +20,10 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
            terraform_version: "1.7.4"
+
+      - name: CD
+        run: cd terraform/
+        run : pwd
          
 
       - name: Terraform Init
