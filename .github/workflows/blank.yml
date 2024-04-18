@@ -23,7 +23,7 @@ jobs:
 
       - name: CD
         run: cd terraform/
-        run : pwd
+        
          
 
       - name: Terraform Init
