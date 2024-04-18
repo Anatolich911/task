@@ -22,7 +22,7 @@ jobs:
            terraform_version: "1.7.4"
 
       - name: CD
-        run: cd terraform/
+        run: cd task/terraform/
 
       - name: pwd
         run: pwd
