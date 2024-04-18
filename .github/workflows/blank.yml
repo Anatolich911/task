@@ -23,6 +23,9 @@ jobs:
 
       - name: CD
         run: cd terraform/
+
+      - name: pwd
+        run: pwd
         
          
 
