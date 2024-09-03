@@ -5,7 +5,7 @@ on:
     inputs:
       folder:
         description: 'Folder to use for the workflow'
-        required: false
+        required: true
         type: string
 
 jobs:
@@ -17,4 +17,4 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup Terraform
-        run: echo "Working in folder"
+        run: echo "Working in folder: ${{ inputs.folder }}"
