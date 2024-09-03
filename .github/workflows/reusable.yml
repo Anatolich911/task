@@ -8,7 +8,7 @@ on:
 
 jobs:
   call-workflow:
-    uses: ./.github/workflows/reusable_main.yml
+    uses: ./.github/workflows/reusable_main.yml@master
     with:
       folder: here
   
