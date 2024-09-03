@@ -8,7 +8,7 @@ on:
 
 jobs:
   test-reusable-workflow:
-    uses: ./.github/workflows/reusable_main.yml
+    uses: ./.github/workflows/reusable-main.yml
     with:
       folder: "my-test-folder"
   
