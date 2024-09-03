@@ -3,7 +3,7 @@ name: Test Reusable Terraform Plan
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
 
 jobs:
