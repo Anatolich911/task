@@ -1,4 +1,4 @@
-name: Terraform Plan
+name: Test Reusable Terraform Plan
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
   pull_request:
 
 jobs:
-  call-workflow:
-    uses: Anatolich911/task/.github/workflows/reusable_main.yml@master
+  test-reusable-workflow:
+    uses: ./.github/workflows/reusable-terraform-plan.yml
     with:
-      folder: here
+      folder: "my-test-folder"
   
