@@ -17,4 +17,4 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup Terraform
-        run: echo "Working in folder: ${{ inputs.folder }}"
+        run: echo "Working in folder"
