@@ -19,3 +19,6 @@ jobs:
       - name: Print Folder
         run: echo "Working in ${{ inputs.folder }}"
 
+  terraform_2:
+      - name: Print Folder
+        run: echo "Working in 2_${{ inputs.folder }}"
