@@ -8,7 +8,7 @@ on:
 
 jobs:
   test-reusable-workflow:
-    uses: ./.github/workflows/reusable-terraform-plan.yml
+    uses: Anatolich911/task/.github/workflows/reusable-terraform-plan.yml@master
     with:
       folder: "my-test-folder"
 
