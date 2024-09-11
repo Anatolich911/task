@@ -22,5 +22,6 @@ jobs:
   terraform_2:
     runs-on: ubuntu-latest
     steps:
+    
       - name: Print Folderx
         run: echo "Working in 2_${{ inputs.folder }}"
